@@ -1,0 +1,17 @@
+C:\Users\javier\Desktop\Nueva carpeta\Tron_Game\obj\Debug\net8.0-windows\Tron_Game.Form1.resources
+C:\Users\javier\Desktop\Nueva carpeta\Tron_Game\obj\Debug\net8.0-windows\Tron_Game.csproj.GenerateResource.cache
+C:\Users\javier\Desktop\Nueva carpeta\Tron_Game\obj\Debug\net8.0-windows\Tron_Game.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\javier\Desktop\Nueva carpeta\Tron_Game\obj\Debug\net8.0-windows\Tron_Game.AssemblyInfoInputs.cache
+C:\Users\javier\Desktop\Nueva carpeta\Tron_Game\obj\Debug\net8.0-windows\Tron_Game.AssemblyInfo.cs
+C:\Users\javier\Desktop\Nueva carpeta\Tron_Game\obj\Debug\net8.0-windows\Tron_Game.csproj.CoreCompileInputs.cache
+C:\Users\javier\Desktop\Nueva carpeta\Tron_Game\bin\Debug\net8.0-windows\Tron_Game.exe
+C:\Users\javier\Desktop\Nueva carpeta\Tron_Game\bin\Debug\net8.0-windows\Tron_Game.deps.json
+C:\Users\javier\Desktop\Nueva carpeta\Tron_Game\bin\Debug\net8.0-windows\Tron_Game.runtimeconfig.json
+C:\Users\javier\Desktop\Nueva carpeta\Tron_Game\bin\Debug\net8.0-windows\Tron_Game.dll
+C:\Users\javier\Desktop\Nueva carpeta\Tron_Game\bin\Debug\net8.0-windows\Tron_Game.pdb
+C:\Users\javier\Desktop\Nueva carpeta\Tron_Game\obj\Debug\net8.0-windows\Tron_Game.dll
+C:\Users\javier\Desktop\Nueva carpeta\Tron_Game\obj\Debug\net8.0-windows\refint\Tron_Game.dll
+C:\Users\javier\Desktop\Nueva carpeta\Tron_Game\obj\Debug\net8.0-windows\Tron_Game.pdb
+C:\Users\javier\Desktop\Nueva carpeta\Tron_Game\obj\Debug\net8.0-windows\Tron_Game.genruntimeconfig.cache
+C:\Users\javier\Desktop\Nueva carpeta\Tron_Game\obj\Debug\net8.0-windows\ref\Tron_Game.dll
+C:\Users\javier\Desktop\Nueva carpeta\Tron_Game\obj\Debug\net8.0-windows\Tron_Game.sourcelink.json
