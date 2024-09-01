@@ -10,6 +10,7 @@ namespace Tron_Game
     {
         public GridNode[,] Nodes { get; private set; }
         public int Size { get; private set; }
+        private Random random = new Random();
 
         // Constructor
         public Grid(int size)
@@ -43,5 +44,70 @@ namespace Tron_Game
                 }
             }
         }
+
+        // Coloca un ítem aleatoriamente en el grid
+        public void ColocarItem(Item item)
+        {
+            int x = random.Next(Size);
+            int y = random.Next(Size);
+
+            while (Nodes[x, y].Item != null) // Asegura que el nodo no esté ocupado por otro ítem
+            {
+                x = random.Next(Size);
+                y = random.Next(Size);
+            }
+
+            Nodes[x, y].Item = item;
+        }
+
+        // Verifica si hay un ítem en la posición actual de la moto
+        public Item RecogerItem(int x, int y)
+        {
+            var nodo = Nodes[x, y];
+            if (nodo.Item != null)
+            {
+                Item itemRecogido = nodo.Item;
+                nodo.Item = null; // Elimina el ítem del nodo
+                return itemRecogido;
+            }
+            return null;
+        }
+
+
+        // Obtener el nodo en una posición específica
+        public GridNode GetCelda(int x, int y)
+        {
+            if (x >= 0 && x < Size && y >= 0 && y < Size)
+            {
+                return Nodes[x, y];
+            }
+            return null;
+        }
+
+
+
+        // Obtiene todos los ítems restantes en la malla
+        public List<Item> ObtenerItemsRestantes()
+        {
+            List<Item> itemsRestantes = new List<Item>();
+
+            for (int x = 0; x < Size; x++)
+            {
+                for (int y = 0; y < Size; y++)
+                {
+                    GridNode celda = GetCelda(x, y); // Usar el método GetCelda
+
+                    if (celda != null && celda.Item != null) // Verifica si el nodo contiene un ítem
+                    {
+                        itemsRestantes.Add(celda.Item);
+                    }
+                }
+            }
+
+            return itemsRestantes;
+        }
+
     }
+
 }
+

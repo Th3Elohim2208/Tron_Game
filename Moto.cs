@@ -15,6 +15,10 @@ namespace Tron_Game
         public int Y { get; private set; } // Posición Y de la moto
         public int deltaX; // Dirección en el eje X
         public int deltaY; // Dirección en el eje Y
+        private Queue<Item> colaDeItems; // Cola para almacenar los ítems
+        private Form1 form;
+        private int celdasRecorridas; // Contador de celdas recorridas
+
 
         // Nodo interno para representar la estela de la moto (lista enlazada simple)
         public class NodoEstela
@@ -31,17 +35,22 @@ namespace Tron_Game
             }
         }
 
-        public Moto(int xInicial, int yInicial)
+
+        public Moto(int xInicial, int yInicial, Form1 formInstance)
         {
             X = xInicial;
             Y = yInicial;
+            this.form = formInstance;
             Velocidad = new Random().Next(1, 11); // Velocidad aleatoria entre 1 y 10
             Combustible = 100; // Combustible inicial
+            celdasRecorridas = 0; // Inicializa el contador de celdas recorridas
 
             deltaX = 1;
             deltaY = 0;
 
             Estela = new LinkedList<NodoEstela>();
+
+            colaDeItems = new Queue<Item>();
 
             // Inicializar la estela con 3 posiciones
             for (int i = 0; i < 3; i++)
@@ -52,6 +61,8 @@ namespace Tron_Game
             }
         }
 
+
+
         public void CambiarDireccion(int nuevoDeltaX, int nuevoDeltaY)
         {
             // Evitar que la moto se mueva hacia atrás sobre sí misma
@@ -61,6 +72,8 @@ namespace Tron_Game
                 deltaY = nuevoDeltaY;
             }
         }
+
+
 
         public bool VerificarColision(int gridSize)
         {
@@ -84,12 +97,23 @@ namespace Tron_Game
             return false;
         }
 
+
+
         // Mover la moto en la dirección indicada
-        public void Mover(int dx, int dy)
+        public void Mover(int dx, int dy, Grid gameGrid)
         {
             // Actualizar la posición de la moto
             X += dx;
             Y += dy;
+
+
+            // Verificar si hay un ítem en la nueva posición
+            GridNode celdaActual = gameGrid.GetCelda(X, Y);
+            if (celdaActual != null && celdaActual.Item != null)
+            {
+                RecogerItem(celdaActual.Item); // Recoger el ítem
+                celdaActual.Item = null; // Limpiar el ítem de la celda
+            }
 
             // Crear un nuevo nodo al frente de la lista
             NodoEstela nuevoNodo = new NodoEstela(X, Y);
@@ -97,18 +121,71 @@ namespace Tron_Game
             Cabeza = nuevoNodo;
 
             // Actualizar la estela
-            Estela.AddFirst(new NodoEstela(X, Y));
+            Estela.AddFirst(nuevoNodo);
 
             // Eliminar el nodo más antiguo si la estela es más larga de lo que debería ser
-            if (Estela.Count > 4)
+            if (Estela.Count > TamañoEstela)
             {
                 Estela.RemoveLast();
             }
 
             // Consumir combustible
-            Combustible -= Velocidad / 5;
 
-           
+            // Incrementar el contador de celdas recorridas
+            celdasRecorridas++;
+
+            // Reducir el combustible cada 5 celdas recorridas
+            if (celdasRecorridas >= 5)
+            {
+                Combustible -= 1;
+                celdasRecorridas = 0; // Reiniciar el contador
+            }
+
+
+        }
+
+
+        public void RecogerItem(Item item)
+        {
+            colaDeItems.Enqueue(item); // Añadir el ítem a la cola
+            ProcesarItems(); // Iniciar el procesamiento de ítems
+        }
+
+
+
+        private async void ProcesarItems()
+        {
+            while (colaDeItems.Count > 0)
+            {
+                Item item = colaDeItems.Dequeue();
+
+                switch (item.Tipo)
+                {
+                    case Item.TipoItem.Combustible:
+                        if (Combustible < 100)
+                        {
+                            Combustible += item.Valor;
+                            if (Combustible > 100) Combustible = 100;
+                        }
+                        else
+                        {
+                            colaDeItems.Enqueue(item); // Reinsertar si el combustible está lleno
+                        }
+                        break;
+
+                    case Item.TipoItem.CrecimientoEstela:
+                        TamañoEstela += item.Valor;
+                        break;
+
+                    case Item.TipoItem.Bomba:
+
+                        form.FinDelJuego("¡Exploto! Fin del juego.");
+                        break;
+                }
+
+                await Task.Delay(1000); // Delay de 1 segundo
+            }
         }
     }
+
 }
