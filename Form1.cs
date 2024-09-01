@@ -41,7 +41,7 @@ namespace Tron_Game
 
 
             // Ajustar el tamaño del formulario
-            this.ClientSize = new Size(gridSize * cellSize + 170, gridSize * cellSize);
+            this.ClientSize = new Size(gridSize * cellSize + 190, gridSize * cellSize);
 
 
             // Crear y configurar la etiqueta de velocidad
@@ -71,8 +71,8 @@ namespace Tron_Game
             // Crear y configurar la etiqueta de información de ítems
             lblInfoItems = new Label();
             lblInfoItems.Location = new Point(gridSize * cellSize + 10, 110); // Posicionar la etiqueta fuera de la malla, debajo de las otras etiquetas
-            lblInfoItems.Size = new Size(160, 140);
-            lblInfoItems.Text = "Color Negro: Bomba\n\nColor Amarillo: Alarga Estela\n\nColor Café: Combustible\n\nColor Azul: Escudo\n\nColor Rojo: Hiper velocidad";
+            lblInfoItems.Size = new Size(180, 140);
+            lblInfoItems.Text = "Color Negro: Bomba\n\nColor Morado: Alarga Estela\n\nColor Café: Combustible\n\nColor Azul: Escudo\n\nColor amarillo: Hiper velocidad";
             this.Controls.Add(lblInfoItems); // Añadir la etiqueta al formulario
 
 
@@ -98,8 +98,8 @@ namespace Tron_Game
 
             Graphics g = e.Graphics;
             Pen gridPen = new Pen(Color.LightGray); // Color de las líneas de la malla
-            Brush motoBrush = Brushes.Blue; // Color de la moto
-            Brush estelaBrush = Brushes.LightBlue; // Color de la estela
+            Brush motoBrush = Brushes.Green; // Color de la moto
+            Brush estelaBrush = Brushes.LightGreen; // Color de la estela
             int cellSize = 10; // Tamaño de cada celda de la malla
             int gridSize = gameGrid?.Size ?? 0; // Tamaño de la malla
 
@@ -125,7 +125,7 @@ namespace Tron_Game
                                 itemBrush = Brushes.Brown;
                                 break;
                             case Item.TipoItem.CrecimientoEstela:
-                                itemBrush = Brushes.Yellow;
+                                itemBrush = Brushes.Purple;
                                 break;
                             case Item.TipoItem.Bomba:
                                 itemBrush = Brushes.Black;
