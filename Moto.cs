@@ -115,6 +115,15 @@ namespace Tron_Game
                 celdaActual.Item = null; // Limpiar el ítem de la celda
             }
 
+
+            // Verificar colisión antes de actualizar la estela
+            if (VerificarColision(gameGrid.Size))
+            {
+                form.FinDelJuego("¡Colisión! Fin del juego.");
+                return;
+            }
+
+
             // Crear un nuevo nodo al frente de la lista
             NodoEstela nuevoNodo = new NodoEstela(X, Y);
             nuevoNodo.Siguiente = Cabeza;

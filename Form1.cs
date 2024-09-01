@@ -78,7 +78,7 @@ namespace Tron_Game
 
             //configura un temporizador para el tiempo de juego
             gameTimer = new System.Windows.Forms.Timer();
-            gameTimer.Interval = 700; // Intervalo de 700 ms
+            gameTimer.Interval = 2000; // Intervalo de 700 ms
             gameTimer.Tick += gameTimer_Tick;
             gameTimer.Start();
 
