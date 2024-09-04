@@ -18,6 +18,7 @@ namespace Tron_Game
         public GridNode Left { get; set; }
         public GridNode Right { get; set; }
         public Item Item { get; set; } // Ítem que se encuentra en este nodo, si hay alguno
+        public Power? Poder { get; set; } // Nueva propiedad para almacenar un poder
 
         // Constructor
         public GridNode(int x, int y)

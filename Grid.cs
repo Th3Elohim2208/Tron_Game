@@ -48,26 +48,30 @@ namespace Tron_Game
         // Coloca un ítem aleatoriamente en el grid
         public void ColocarItem(Item item)
         {
-            int x = random.Next(Size);
-            int y = random.Next(Size);
+            int x, y;
+            GridNode celda;
 
-            while (Nodes[x, y].Item != null) // Asegura que el nodo no esté ocupado por otro ítem
+            do
             {
-                x = random.Next(Size);
+                x = random.Next(Size);// Tamaño de la grid
                 y = random.Next(Size);
-            }
+                celda = GetCelda(x, y);
+            } while (celda != null && celda.Item != null); // Asegura que el nodo no esté ocupado por otro ítem
 
-            Nodes[x, y].Item = item;
+            if (celda != null)
+            {
+                celda.Item = item;
+            }
         }
 
         // Verifica si hay un ítem en la posición actual de la moto
         public Item RecogerItem(int x, int y)
         {
-            var nodo = Nodes[x, y];
-            if (nodo.Item != null)
+            GridNode celda = GetCelda(x, y);
+            if (celda != null && celda.Item != null)
             {
-                Item itemRecogido = nodo.Item;
-                nodo.Item = null; // Elimina el ítem del nodo
+                Item itemRecogido = celda.Item;
+                celda.Item = null; // Elimina el ítem del nodo
                 return itemRecogido;
             }
             return null;
@@ -85,28 +89,24 @@ namespace Tron_Game
         }
 
 
-
-        // Obtiene todos los ítems restantes en la malla
-        public List<Item> ObtenerItemsRestantes()
+        // Coloca un poder aleatoriamente en el grid
+        public void ColocarPoder(Power poder)
         {
-            List<Item> itemsRestantes = new List<Item>();
+            int x, y;
+            GridNode celda;
 
-            for (int x = 0; x < Size; x++)
+            do
             {
-                for (int y = 0; y < Size; y++)
-                {
-                    GridNode celda = GetCelda(x, y); // Usar el método GetCelda
+                x = random.Next(0, Size); // Tamaño de la grid
+                y = random.Next(0, Size);
+                celda = GetCelda(x, y);
+            } while (celda != null && celda.Item != null); // Asegurarse de no colocar el poder en una celda ya ocupada
 
-                    if (celda != null && celda.Item != null) // Verifica si el nodo contiene un ítem
-                    {
-                        itemsRestantes.Add(celda.Item);
-                    }
-                }
+            if (celda != null)
+            {
+                celda.Poder = poder; // Asignar el poder a la celda seleccionada
             }
-
-            return itemsRestantes;
         }
-
     }
 
 }

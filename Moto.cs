@@ -15,9 +15,17 @@ namespace Tron_Game
         public int Y { get; private set; } // Posición Y de la moto
         public int deltaX; // Dirección en el eje X
         public int deltaY; // Dirección en el eje Y
-        private Queue<Item> colaDeItems; // Cola para almacenar los ítems
+        public Stack<Power> PilaDePoderes { get; private set; } = new Stack<Power>();
+        public Queue<Item> colaDeItems; // Cola para almacenar los ítems
+        public Brush MotoBrush { get; private set; }
+        public Brush EstelaBrush { get; private set; }
         private Form1 form;
         private int celdasRecorridas; // Contador de celdas recorridas
+        private System.Windows.Forms.Timer? escudoTimer; // Temporizador para controlar la duración del escudo
+        private System.Windows.Forms.Timer? hiperVelocidadTimer; // Temporizador para controlar la duración de la hiper velocidad
+        private Color colorActual;
+        private bool escudoActivo = false; // Indica si el escudo está activo
+
 
 
         // Nodo interno para representar la estela de la moto (lista enlazada simple)
@@ -26,12 +34,14 @@ namespace Tron_Game
             public int X { get; set; }
             public int Y { get; set; }
             public NodoEstela Siguiente { get; set; }
+            public Color Color { get; set; }
 
             public NodoEstela(int x, int y)
             {
                 X = x;
                 Y = y;
                 Siguiente = null;
+                Color = Color.LightGreen; // Color inicial de la estela
             }
         }
 
@@ -43,10 +53,12 @@ namespace Tron_Game
             this.form = formInstance;
             Velocidad = new Random().Next(1, 11); // Velocidad aleatoria entre 1 y 10
             Combustible = 100; // Combustible inicial
-            celdasRecorridas = 0; // Inicializa el contador de celdas recorridas
 
             deltaX = 1;
             deltaY = 0;
+
+            MotoBrush = Brushes.Green;
+            EstelaBrush = Brushes.LightGreen;
 
             Estela = new LinkedList<NodoEstela>();
 
@@ -59,6 +71,7 @@ namespace Tron_Game
                 Estela.AddLast(nodo);
                 if (i == 0) Cabeza = nodo; // El primer nodo se convierte en la cabeza
             }
+
         }
 
 
@@ -80,15 +93,27 @@ namespace Tron_Game
             // Verificar si la moto se sale de los límites del grid
             if (X < 0 || Y < 0 || X >= gridSize || Y >= gridSize)
             {
+                if (escudoActivo)
+                {
+                    escudoActivo = false; // Desactiva el escudo tras absorber la colisión
+                    RestaurarColoresOriginales();
+                    return false; // No se efectúa la colisión
+                }
                 return true;
             }
 
             // Verificar si la moto choca con su propia estela
-            NodoEstela actual = Cabeza.Siguiente; // La cabeza no se verifica contra sí misma
+            NodoEstela actual = Cabeza.Siguiente;
             while (actual != null)
             {
                 if (actual.X == X && actual.Y == Y)
                 {
+                    if (escudoActivo)
+                    {
+                        escudoActivo = false; // Desactiva el escudo tras absorber la colisión
+                        RestaurarColoresOriginales();
+                        return false; // No se efectúa la colisión
+                    }
                     return true;
                 }
                 actual = actual.Siguiente;
@@ -96,6 +121,7 @@ namespace Tron_Game
 
             return false;
         }
+
 
 
 
@@ -109,12 +135,22 @@ namespace Tron_Game
 
             // Verificar si hay un ítem en la nueva posición
             GridNode celdaActual = gameGrid.GetCelda(X, Y);
-            if (celdaActual != null && celdaActual.Item != null)
+            if (celdaActual != null)
             {
-                RecogerItem(celdaActual.Item); // Recoger el ítem
-                celdaActual.Item = null; // Limpiar el ítem de la celda
-            }
+                // Recoger ítem si existe en la celda
+                if (celdaActual.Item != null)
+                {
+                    RecogerItem(celdaActual.Item); // Recoger el ítem
+                    celdaActual.Item = null; // Limpiar el ítem de la celda
+                }
 
+                // Recoger poder si existe en la celda
+                if (celdaActual.Poder != null)
+                {
+                    RecogerPoder(celdaActual.Poder); // Recoger el poder
+                    celdaActual.Poder = null; // Limpiar el poder de la celda
+                }
+            }
 
             // Verificar colisión antes de actualizar la estela
             if (VerificarColision(gameGrid.Size))
@@ -122,6 +158,7 @@ namespace Tron_Game
                 form.FinDelJuego("¡Colisión! Fin del juego.");
                 return;
             }
+
 
 
             // Crear un nuevo nodo al frente de la lista
@@ -161,6 +198,13 @@ namespace Tron_Game
         }
 
 
+        public void RecogerPoder(Power poder)
+        {
+            PilaDePoderes.Push(poder);//añade el poder a la pila
+            form.ActualizarPoder();    // Actualiza la interfaz de usuario
+
+        }
+
 
         private async void ProcesarItems()
         {
@@ -187,14 +231,131 @@ namespace Tron_Game
                         break;
 
                     case Item.TipoItem.Bomba:
-
-                        form.FinDelJuego("¡Exploto! Fin del juego.");
+                        if (escudoActivo)
+                        {
+                            escudoActivo = false; // Desactiva el escudo tras absorber la colisión
+                            RestaurarColoresOriginales();
+                            return; // No se efectúa la explosion
+                        }
+                        else
+                        {
+                            form.FinDelJuego("¡Exploto! Fin del juego.");
+                        }
                         break;
                 }
 
                 await Task.Delay(1000); // Delay de 1 segundo
             }
         }
+
+
+        public void AplicarPoder()
+        {
+            if (PilaDePoderes.Count > 0)
+            {
+                Power poderActual = PilaDePoderes.Pop();
+
+                switch (poderActual.Tipo)
+                {
+                    case Power.TipoPower.Escudo:
+                        ActivarEscudo(poderActual.Duracion);
+                        break;
+
+                    case Power.TipoPower.HiperVelocidad:
+                        ActivarHiperVelocidad(poderActual.Duracion, poderActual.Valor);
+                        break;
+                }
+                CambiarColorMoto(((SolidBrush)MotoBrush).Color); // Actualiza el color en el formulario
+                form.ActualizarPoder(); // Actualiza la etiqueta de poder
+            }
+        }
+
+
+        private void ActivarEscudo(int duracion)
+        {
+            // Cambiar el color de la moto a azul
+            colorActual = Color.Blue;
+            CambiarColorMoto(Color.Blue);
+            CambiarColorEstela(Color.LightSkyBlue);
+
+            // Actualizar el label
+            form.ActualizarPoder();
+
+            escudoActivo = true; // Activa el escudo
+            // Iniciar el temporizador para desactivar el escudo después de la duración
+            escudoTimer = new System.Windows.Forms.Timer();
+            escudoTimer.Interval = duracion * 1000; // Convertir duración en milisegundos
+            escudoTimer.Tick += (sender, e) => 
+            {
+                escudoActivo = false; // Desactiva el escudo
+                // Restaurar el color original
+                RestaurarColoresOriginales();
+                escudoTimer.Stop();
+            };
+            escudoTimer.Start();
+            form.Invalidate(); // Redibuja el formulario para mostrar los cambios
+        }
+
+        private void ActivarHiperVelocidad(int duracion, int incrementoVelocidad)
+        {
+            // Aumentar la velocidad
+            Velocidad += incrementoVelocidad;
+            form.timer.Interval = 1000 / Velocidad;/////////////////////
+
+            // Cambiar el color de la moto y la estela a amarillo
+            colorActual = Color.Yellow;
+            CambiarColorMoto(Color.Yellow);
+            CambiarColorEstela(Color.LightYellow);
+
+
+
+            // Actualizar el label
+            form.ActualizarPoder();
+
+            // Iniciar el temporizador para desactivar la hiper velocidad después de la duración
+            hiperVelocidadTimer = new System.Windows.Forms.Timer();
+            hiperVelocidadTimer.Interval = duracion * 1000; // Convertir duración en milisegundos
+            hiperVelocidadTimer.Tick += (sender, e) =>
+            {
+                // Restaurar la velocidad original y el color
+                Velocidad -= incrementoVelocidad;
+                form.timer.Interval = 1000 / Velocidad;
+                RestaurarColoresOriginales();
+                hiperVelocidadTimer.Stop();
+            };
+            hiperVelocidadTimer.Start();
+            form.Invalidate(); // Redibuja el formulario para mostrar los cambios
+        }
+
+
+
+        private void RestaurarColoresOriginales()
+        {
+            CambiarColorMoto(Color.Green);
+            CambiarColorEstela(Color.LightGreen);
+        }
+
+
+
+        public void CambiarColorMoto(Color nuevoColor)
+        {
+            colorActual = nuevoColor; // Cambia el color actual de la moto
+            MotoBrush = new SolidBrush(nuevoColor); // Cambia el color del brush de la moto
+            form.Invalidate(); // Redibuja el formulario para aplicar el cambio
+        }
+
+
+        public void CambiarColorEstela(Color nuevoColor)
+        {
+            EstelaBrush = new SolidBrush(nuevoColor); // Cambia el color del brush de la estela
+                                                      // Cambia el color de todos los nodos de la estela
+            foreach (var nodo in Estela)
+            {
+                nodo.Color = nuevoColor;
+            }
+            form.Invalidate(); // Redibuja el formulario para aplicar el cambio
+        }
+
     }
 
 }
